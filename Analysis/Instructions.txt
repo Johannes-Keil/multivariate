@@ -1,0 +1,42 @@
+0 = control / twins general population / low schizotypy
+1 = relative of psychotic patient / psychometric risk psychosis
+2 = psychotic patient / psychotic patient, not paranoid
+3 = depression patient / depression in past + current mild complaints
+
+Und hier eine Zusammenfassung der naechsten Schritte:
+
+- using the ESM merge file data, fit NA-PA models (with random intercepts and
+  slopes) in both directions within each study and subgroup; try to find a
+  case where the association is significant in one but not the other direction
+- optional: also do this also when separating the within- and between-subject
+  relationship (but the within-subject relationship should be very similar to
+  the one we get from the model where we do not separate the two)
+- fit the multivariate model to get the within-person correlation and the
+  corresponding CI (with intervals(res), but this may fail in some cases)
+- use within-subject standardization on NA and PA
+
+dat$zpa <- ave(dat$pa, dat$subjno, FUN = function(x) (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE))
+dat$zna <- ave(dat$na, dat$subjno, FUN = function(x) (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE))
+
+- fit a standard regression model (res <- lm(zpa ~ 0 + zna, data=dat))
+  predicting zPA from zNA (and vice-versa, but results must be the same) to
+  get the within-subject correlation (which should be more or less the same as
+  that from the multivariate model); also compare the CI for the correlation
+  (confint(res)) from both models (should be quite similar)
+- add a random slope to the model (but no random intercept, since the variance
+  should be 0 by definition due to the within-subject standardization)
+
+res <- lme(zpa ~ 0 + zna, random = ~ 0 + zna | subjno, data=dat, na.action=na.omit)
+summary(res)
+
+- the coefficient is then like an average correlation; get the CI for the
+  coefficient (intervals(res, which="fixed")) which should be wider as the
+  model allows the correlation to differ across subjects
+
+- p-scatterplot separat für alle sub-studien
+- Repeat PA/NA analyse
+- ALLE beeps, aber kleines n
+- multivariate model plot!
+-illustration scatter r  breitere CIs - scatterplot der breite der CIs pro sample
+- try(), inherits(), next
+- advances in psychological methods and practices

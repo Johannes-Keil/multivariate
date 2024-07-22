@@ -1,0 +1,40 @@
+2024-05-23
+
+- goal is to first show that depending on the direction (NA -> PA or PA -> NA)
+  one can get different results (based on p-value)
+  - lme(pa ~ na, random = ~ na | subjno, data=dat)
+  - lme(na ~ pa, random = ~ pa | subjno, data=dat)
+- have to draw a smaller sample to find cases with discrepancies (maybe n=10
+  or n=20, but use all beeps)
+- repeat this many times to create a scatterplot of the p-values for each
+  study and patient group (add diagonal reference line and lines for the four
+  quadrants -- sig/not sig)
+- also fit the multivariate model in the sample and extract the correlation
+  and the corresponding CI
+- also use the 'within-person standardization approach', get the coefficient,
+  which should be essentially identical to the correlation from the
+  multivariate model (check with scatterplots); also can compare the CIs
+  (should be very similar, but not quite identical due to difference in
+  methods)
+- also add random slopes to this approach and plot the correlations without
+  and with random slopes against each other and plot the bounds of the CIs
+  against each other
+
+
+while(iter <= 1000) {
+
+   sub <- dat[dat$subjno %in% sample(unique(dat$subjno), 5),]
+
+   res <- try(lme(pa ~ na, random = ~ na | subjno, data=sub, na.action=na.omit), silent=TRUE)
+
+   if (inherits(res, "try-error"))
+      next
+
+   res <- try(lme(na ~ pa, random = ~ pa | subjno, data=sub, na.action=na.omit), silent=TRUE)
+
+   if (inherits(res, "try-error"))
+      next
+
+   iter <- iter + 1
+
+}
